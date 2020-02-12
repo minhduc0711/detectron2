@@ -74,7 +74,7 @@ def fast_rcnn_inference(boxes, scores, image_shapes, score_thresh, nms_thresh, t
 
 
 def fast_rcnn_inference_single_image(
-    boxes, scores, image_shape, score_thresh, nms_thresh, topk_per_image
+    boxes, scores, image_shape, score_thresh, nms_thresh, topk_per_image, agnostic=True
 ):
     """
     Single-image inference. Return bounding-box detection results by thresholding
@@ -106,7 +106,8 @@ def fast_rcnn_inference_single_image(
     scores = scores[filter_mask]
 
     # Apply per-class NMS
-    keep = batched_nms(boxes, scores, filter_inds[:, 1], nms_thresh)
+    c = filter_inds[:, 1] * 0 if agnostic else filter_inds[:, 1]
+    keep = batched_nms(boxes, scores, c, nms_thresh)
     if topk_per_image >= 0:
         keep = keep[:topk_per_image]
     boxes, scores, filter_inds = boxes[keep], scores[keep], filter_inds[keep]
